@@ -925,7 +925,7 @@ class FilesystemException(Exception):
 
 class Document2QueryMixin(object):
 
-  def documents(self, user, perms='both', include_history=False, include_trashed=False, include_managed=False, include_shared_links=False):
+  def documents(self, user, perms='both', include_history=False, include_trashed=False, include_managed=False, include_shared_links=False, allow_distinct=False):
     """
     Returns all documents that are owned or shared with the user.
     :param perms: both, shared, owned. Defaults to both.
@@ -959,7 +959,10 @@ class Document2QueryMixin(object):
     if not include_trashed:
       docs = docs.exclude(is_trashed=True)
 
-    return docs.defer('description', 'data', 'extra', 'search').distinct().order_by('-last_modified')
+    if allow_distinct:
+      docs = docs.distinct()
+
+    return docs.defer('description', 'data', 'extra', 'search').order_by('-last_modified')
 
 
   def search_documents(self, types=None, search_text=None, order_by=None):
